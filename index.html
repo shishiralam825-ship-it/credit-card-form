@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animated Credit Card</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #1a1a2e;
+    }
+
+    .container {
+      width: 400px;
+      perspective: 1000px;
+    }
+
+    /* Credit card wrapper for flipping */
+    .credit-card {
+      width: 100%;
+      height: 220px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s ease;
+      margin-bottom: 20px;
+    }
+
+    .credit-card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 15px;
+      backface-visibility: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      padding: 20px;
+      color: white;
+    }
+
+    /* Card front */
+    .card-front {
+      background: linear-gradient(135deg, #000428, #004e92);
+    }
+
+    .card-front .bank {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .card-number {
+      font-size: 20px;
+      letter-spacing: 3px;
+      margin: 20px 0;
+    }
+
+    .card-front .flex {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+    }
+
+    /* Card back */
+    .card-back {
+      background: linear-gradient(135deg, #004e92, #000428);
+      transform: rotateY(180deg);
+    }
+
+    .black-strip {
+      background: black;
+      height: 50px;
+      margin-top: 20px;
+      border-radius: 5px;
+    }
+
+    .cvv-box {
+      background: white;
+      color: black;
+      width: 100px;
+      height: 40px;
+      margin-top: 30px;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: right;
+      font-weight: bold;
+    }
+
+    /* Form */
+    form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    form input, form select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    form .flex {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      background: #4a69bd;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e3799;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Card -->
+    <div class="credit-card" id="credit-card">
+      <!-- Front -->
+      <div class="card-front">
+        <div class="bank">DISCOVER</div>
+        <div class="card-number" id="card-number">#### #### #### ####</div>
+        <div class="flex">
+          <div>
+            <div>Card Holder</div>
+            <div id="card-holder">FULL NAME</div>
+          </div>
+          <div>
+            <div>Expires</div>
+            <div id="card-expiry">MM/YY</div>
+          </div>
+        </div>
+      </div>
+      <!-- Back -->
+      <div class="card-back">
+        <div class="black-strip"></div>
+        <div class="cvv-box" id="cvv-box">###</div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form>
+      <input type="text" placeholder="Card Number" id="input-card-number" maxlength="19">
+      <input type="text" placeholder="Card Holder" id="input-card-holder">
+      <div class="flex">
+        <select id="exp-month">
+          <option value="">Month</option>
+          <option>01</option><option>02</option><option>03</option>
+          <option>04</option><option>05</option><option>06</option>
+          <option>07</option><option>08</option><option>09</option>
+          <option>10</option><option>11</option><option>12</option>
+        </select>
+        <select id="exp-year">
+          <option value="">Year</option>
+          <option>24</option><option>25</option><option>26</option>
+          <option>27</option><option>28</option><option>29</option>
+        </select>
+      </div>
+      <input type="text" placeholder="CVV" maxlength="3" id="input-cvv">
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <script>
+    const card = document.getElementById("credit-card");
+    const cardNumberInput = document.getElementById("input-card-number");
+    const cardHolderInput = document.getElementById("input-card-holder");
+    const expMonth = document.getElementById("exp-month");
+    const expYear = document.getElementById("exp-year");
+    const cvvInput = document.getElementById("input-cvv");
+
+    const cardNumber = document.getElementById("card-number");
+    const cardHolder = document.getElementById("card-holder");
+    const cardExpiry = document.getElementById("card-expiry");
+    const cvvBox = document.getElementById("cvv-box");
+
+    cardNumberInput.addEventListener("input", () => {
+      let formatted = cardNumberInput.value.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim();
+      cardNumber.textContent = formatted || "#### #### #### ####";
+    });
+
+    cardHolderInput.addEventListener("input", () => {
+      cardHolder.textContent = cardHolderInput.value || "FULL NAME";
+    });
+
+    function updateExpiry() {
+      cardExpiry.textContent = (expMonth.value && expYear.value) ? `${expMonth.value}/${expYear.value}` : "MM/YY";
+    }
+    expMonth.addEventListener("change", updateExpiry);
+    expYear.addEventListener("change", updateExpiry);
+
+    cvvInput.addEventListener("focus", () => {
+      card.classList.add("flipped");
+    });
+
+    cvvInput.addEventListener("blur", () => {
+      card.classList.remove("flipped");
+    });
+
+    cvvInput.addEventListener("input", () => {
+      cvvBox.textContent = cvvInput.value || "###";
+    });
+  </script>
+</body>
+</html>
